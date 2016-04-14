@@ -33,8 +33,8 @@ class CharmCache(dict):
                 series
             )
 
-        if (branch and branch.endswith('.git') or
-                branch.startswith('https://github.com')):
+        if (branch and (branch.endswith('.git') or
+                branch.startswith('https://github.com'))):
             return GitCharm(branch, name=charm_path)
 
         if os.path.exists(os.path.expanduser(charm_path)):
