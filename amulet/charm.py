@@ -33,7 +33,8 @@ class CharmCache(dict):
                 series
             )
 
-        if branch and branch.endswith('.git'):
+        if (branch and branch.endswith('.git') or
+                branch.startswith('https://github.com')):
             return GitCharm(branch, name=charm_path)
 
         if os.path.exists(os.path.expanduser(charm_path)):
@@ -143,14 +144,24 @@ class GitCharm(VCSCharm):
         self.relations = {}
         self.provides = {}
         self.requires = {}
-        self.branch = self.fork = fork
+        # NOTE: deployer style format <repo>;<branch>
+        _fork = fork.split(';')[0]
+        self.fork = _fork
+        if len(fork.split(';')) > 1:
+            self.branch = fork.split(';')[1]
+        else:
+            self.branch = None
         self._parse(self._raw)
 
     @reify
     def _raw(self):
         with tempdir() as td:
-            cmd = "git clone -n --depth=1 {} {}"\
-                .format(self.fork, self.name)
+            if self.branch is not None:
+                cmd = "git clone -n -b {} --depth=1 {} {}"\
+                   .format(self.branch, self.fork, self.name)
+            else:
+                cmd = "git clone -n --depth=1 {} {}"\
+                   .format(self.fork, self.name)
 
             with path(td):
                 self.call(shlex.split(cmd))
