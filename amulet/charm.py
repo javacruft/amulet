@@ -35,7 +35,7 @@ class CharmCache(dict):
 
         if (charm_path.endswith('.git') or
                 charm_path.startswith('https://github.com')):
-            return GitCharm(branch, name=charm_path)
+            return GitCharm(charm_path)
 
         if os.path.exists(os.path.expanduser(charm_path)):
             return LocalCharm(charm_path, series)
